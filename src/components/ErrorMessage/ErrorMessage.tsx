@@ -1,20 +1,23 @@
-interface ErrorMessageProps {
+interface Props {
   message: string;
 }
 
-const ErrorMessage = ({ message }: ErrorMessageProps) => {
+const AlertError = ({ message }: Props) => {
   return (
-    <p
+    <div
       style={{
-        color: "red",
+        color: "#d32f2f",
+        fontWeight: 600,
         textAlign: "center",
-        fontWeight: 500,
-        marginTop: "20px"
+        margin: "24px 0",
+        fontFamily: "Arial, sans-serif",
       }}
+      role="alert"
+      aria-live="assertive"
     >
-      Error: {message}
-    </p>
+      Ошибка: {message}
+    </div>
   );
 };
 
-export default ErrorMessage;
+export default AlertError;
