@@ -12,7 +12,7 @@ export const Pagination = ({
   currentPage,
   onPageChange,
 }: PaginationProps) => {
-  if (pageCount <= 1) return null; 
+  if (pageCount <= 1) return null;
 
   return (
     <ReactPaginate
@@ -20,7 +20,7 @@ export const Pagination = ({
       nextLabel=">"
       previousLabel="<"
       pageCount={pageCount}
-      forcePage={currentPage - 1} 
+      forcePage={currentPage - 1}
       onPageChange={(event) => onPageChange(event.selected + 1)}
       containerClassName={css.pagination}
       pageClassName={css.page}
@@ -28,6 +28,10 @@ export const Pagination = ({
       previousClassName={css.arrow}
       nextClassName={css.arrow}
       disabledClassName={css.disabled}
+      ariaLabelBuilder={(page) => `Page ${page}`}
+      previousAriaLabel="Previous page"
+      nextAriaLabel="Next page"
+      breakAriaLabel="More pages"
     />
   );
 };
