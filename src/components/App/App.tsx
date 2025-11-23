@@ -12,87 +12,89 @@ import { NoteForm } from "../NoteForm/NoteForm";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
-import styles from "./App.module.css";
+import css from "./App.module.css";
 
-function App() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
+const App = () => {
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [debouncedInput] = useDebounce(searchTerm, 500);
+  const [debouncedSearch] = useDebounce(search, 500);
 
-  const client = useQueryClient();
+  const queryClient = useQueryClient();
 
-  const {
-    data: notesData,
-    isLoading: loadingNotes,
-    isError: notesError,
-    error: notesErrorObj,
-  } = useQuery({
-    queryKey: ["notes", currentPage, debouncedInput],
-    queryFn: () => fetchNotes(currentPage, debouncedInput),
-    placeholderData: prev => prev,
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["notes", page, debouncedSearch],
+    queryFn: () => fetchNotes(page, debouncedSearch),
+    placeholderData: (prev) => prev,
   });
 
-  const addNoteMutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: createNote,
     onSuccess: () => {
-      client.invalidateQueries({ queryKey: ["notes"] });
-      setModalVisible(false);
+      queryClient.invalidateQueries({
+        queryKey: ["notes"],
+      });
+      setIsModalOpen(false);
     },
   });
 
-  const removeNoteMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: deleteNote,
     onSuccess: () => {
-      client.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes"],
+      });
     },
   });
 
-  const onSearchChange = val => {
-    setSearchTerm(val);
-    setCurrentPage(1);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
   };
 
-  const onPagination = num => setCurrentPage(num);
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
 
-  const openModal = () => setModalVisible(true);
-  const closeModal = () => setModalVisible(false);
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   return (
-    <div className={styles.app}>
-      <header className={styles.toolbar}>
-        <SearchBox value={searchTerm} onChange={onSearchChange} />
+    <div className={css.app}>
+      <header className={css.toolbar}>
+        <SearchBox value={search} onChange={handleSearchChange} />
 
-        {notesData && notesData.totalPages > 1 && (
+        {data && data.totalPages > 1 && (
           <Pagination
-            currentPage={currentPage}
-            pageCount={notesData.totalPages}
-            onPageChange={onPagination}
+            currentPage={page}
+            pageCount={data.totalPages}
+            onPageChange={handlePageChange}
           />
         )}
 
-        <button className={styles.button} onClick={openModal}>
+        <button className={css.button} onClick={handleOpenModal}>
           Create note +
         </button>
       </header>
 
-      {loadingNotes && <Loader />}
-      {notesError && (
-        <ErrorMessage message={notesErrorObj?.message || "Unknown error"} />
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage message={(error as Error).message} />}
+
+      {data && data.notes.length > 0 && (
+        <NoteList notes={data.notes} onDelete={deleteMutation.mutate} />
       )}
 
-      {notesData && notesData.notes.length > 0 && (
-        <NoteList notes={notesData.notes} onDelete={removeNoteMutation.mutate} />
-      )}
-
-      {modalVisible && (
-        <Modal onClose={closeModal}>
-          <NoteForm onCancel={closeModal} onSubmit={addNoteMutation.mutate} />
+      {isModalOpen && (
+        <Modal onClose={handleCloseModal}>
+          <NoteForm
+            onCancel={handleCloseModal}
+            onSubmit={createMutation.mutate}
+          />
         </Modal>
       )}
     </div>
   );
-}
+};
 
 export default App;
