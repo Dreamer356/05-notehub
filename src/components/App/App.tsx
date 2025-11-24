@@ -89,7 +89,7 @@ const App = () => {
         <Modal onClose={handleCloseModal}>
           <NoteForm
             onCancel={handleCloseModal}
-            onSubmit={(values) => createMutation.mutate(values)}
+            onSubmit={createMutation.mutate}
           />
         </Modal>
       )}
