@@ -2,7 +2,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { NoteTag, CreateNoteParams } from "../../types/note";
+import type { NoteTag } from "../../types/note";
 import { createNote } from "../../api/notesApi";
 import css from "./NoteForm.module.css";
 
@@ -14,17 +14,17 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (data: CreateNoteParams) => createNote(data),
+    mutationFn: createNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
-      onCancel();
+      onCancel(); // Закрыть форму
     },
   });
 
-  const initialValues: CreateNoteParams = {
+  const initialValues = {
     title: "",
     content: "",
-    tag: "Todo",
+    tag: "Todo" as NoteTag,
   };
 
   const validationSchema = Yup.object({
@@ -32,19 +32,23 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
       .min(3, "Title must be at least 3 characters")
       .max(50, "Title must not exceed 50 characters")
       .required("Title is required"),
+
     content: Yup.string().max(500, "Content must not exceed 500 characters"),
+
     tag: Yup.mixed<NoteTag>()
-      .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
+      .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"] as const)
       .required("Tag is required"),
   });
+
+  const handleSubmit = async (values: typeof initialValues) => {
+    await mutation.mutateAsync(values);
+  };
 
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={async (values) => {
-        await mutation.mutateAsync(values);
-      }}
+      onSubmit={handleSubmit}
     >
       {({ isSubmitting }) => (
         <Form className={css.form}>
