@@ -1,10 +1,9 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-
-import type { NoteTag } from "../../types/note";
-import css from "./NoteForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "../../services/noteService";
+import type { NoteTag } from "../../types/note";
+import css from "./NoteForm.module.css";
 
 interface NoteFormProps {
   onCancel: () => void;
@@ -32,9 +31,7 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
       .min(3, "Title must be at least 3 characters")
       .max(50, "Title must not exceed 50 characters")
       .required("Title is required"),
-
     content: Yup.string().max(500, "Content must not exceed 500 characters"),
-
     tag: Yup.mixed<NoteTag>()
       .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
       .required("Tag is required"),
@@ -44,7 +41,11 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values) => mutation.mutate(values)}
+      onSubmit={(values, { setSubmitting }) => {
+        mutation.mutate(values, {
+          onSettled: () => setSubmitting(false),
+        });
+      }}
     >
       {({ isSubmitting }) => (
         <Form className={css.form}>
@@ -56,18 +57,8 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
 
           <div className={css.formGroup}>
             <label htmlFor="content">Content</label>
-            <Field
-              as="textarea"
-              id="content"
-              name="content"
-              rows={8}
-              className={css.textarea}
-            />
-            <ErrorMessage
-              name="content"
-              component="span"
-              className={css.error}
-            />
+            <Field as="textarea" id="content" name="content" rows={8} className={css.textarea} />
+            <ErrorMessage name="content" component="span" className={css.error} />
           </div>
 
           <div className={css.formGroup}>
@@ -83,19 +74,10 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
           </div>
 
           <div className={css.actions}>
-            <button
-              type="button"
-              className={css.cancelButton}
-              onClick={onCancel}
-            >
+            <button type="button" className={css.cancelButton} onClick={onCancel}>
               Cancel
             </button>
-
-            <button
-              type="submit"
-              className={css.submitButton}
-              disabled={isSubmitting}
-            >
+            <button type="submit" className={css.submitButton} disabled={isSubmitting}>
               Create note
             </button>
           </div>
