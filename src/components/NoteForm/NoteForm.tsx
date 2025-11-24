@@ -27,14 +27,9 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
   };
 
   const validationSchema = Yup.object({
-    title: Yup.string()
-      .min(3, "Title must be at least 3 characters")
-      .max(50, "Title must not exceed 50 characters")
-      .required("Title is required"),
+    title: Yup.string().min(3, "Title must be at least 3 characters").max(50, "Title must not exceed 50 characters").required("Title is required"),
     content: Yup.string().max(500, "Content must not exceed 500 characters"),
-    tag: Yup.mixed<NoteTag>()
-      .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
-      .required("Tag is required"),
+    tag: Yup.mixed<NoteTag>().oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"]).required("Tag is required"),
   });
 
   return (
@@ -54,13 +49,11 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
             <Field id="title" name="title" type="text" className={css.input} />
             <ErrorMessage name="title" component="span" className={css.error} />
           </div>
-
           <div className={css.formGroup}>
             <label htmlFor="content">Content</label>
             <Field as="textarea" id="content" name="content" rows={8} className={css.textarea} />
             <ErrorMessage name="content" component="span" className={css.error} />
           </div>
-
           <div className={css.formGroup}>
             <label htmlFor="tag">Tag</label>
             <Field as="select" id="tag" name="tag" className={css.select}>
@@ -72,14 +65,9 @@ export const NoteForm = ({ onCancel }: NoteFormProps) => {
             </Field>
             <ErrorMessage name="tag" component="span" className={css.error} />
           </div>
-
           <div className={css.actions}>
-            <button type="button" className={css.cancelButton} onClick={onCancel}>
-              Cancel
-            </button>
-            <button type="submit" className={css.submitButton} disabled={isSubmitting}>
-              Create note
-            </button>
+            <button type="button" className={css.cancelButton} onClick={onCancel}>Cancel</button>
+            <button type="submit" disabled={isSubmitting} className={css.submitButton}>Create note</button>
           </div>
         </Form>
       )}
