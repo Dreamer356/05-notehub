@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
+
 import { fetchNotes } from "../../services/noteService";
 
 import { NoteList } from "../NoteList/NoteList";
@@ -18,7 +19,6 @@ const App = () => {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [debouncedSearch] = useDebounce(search, 500);
-  const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["notes", page, debouncedSearch],
